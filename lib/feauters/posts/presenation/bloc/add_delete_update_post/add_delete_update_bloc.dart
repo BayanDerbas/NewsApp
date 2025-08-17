@@ -1,68 +1,62 @@
 import 'package:bloc/bloc.dart';
-import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:posts/core/constants/app_Messages.dart';
-import 'package:posts/core/errors/failures.dart';
-import 'package:posts/feauters/posts/domain/entities/post_entity.dart';
-import 'package:posts/feauters/posts/domain/usecases/add_post.dart';
-import 'package:posts/feauters/posts/domain/usecases/delete_post.dart';
-import 'package:posts/feauters/posts/domain/usecases/update_post.dart';
-import 'package:posts/feauters/posts/presenation/bloc/posts/posts_bloc.dart';
+import '../../../../../core/constants/app_Messages.dart';
+import '../../../../../core/errors/failures.dart';
+import '../../../domain/entities/post_entity.dart';
+import '../../../domain/repositories/post_repository.dart';
 
 part 'add_delete_update_event.dart';
 part 'add_delete_update_state.dart';
 
-class AddDeleteUpdateBloc
-    extends Bloc<AddDeleteUpdateEvent, AddDeleteUpdateState> {
-  final AddPostUseCase addPost;
-  final DeletePostUseCase deletePost;
-  final UpdatePostUseCase updatePost;
-  AddDeleteUpdateBloc({
-    required this.addPost,
-    required this.deletePost,
-    required this.updatePost,
-  }) : super(AddDeleteUpdateInitial()) {
-    on<AddDeleteUpdateEvent>((event, emit) async {
+class AddDeleteUpdateBloc extends Bloc<AddDeleteUpdateEvent, AddDeleteUpdateState> {
+  final PostRepository repository;
 
-      if (event is AddPostEvent) {
-        emit(AddDeleteUpdateLoading());
-        final failureOrSuccessMessage = await addPost(event.post as PostEntity);
-        emit(_either(failureOrSuccessMessage, Add_Success_Message));
-      }
+  AddDeleteUpdateBloc({required this.repository})
+      : super(AddDeleteUpdateInitial()) {
+    on<AddPostEvent>((event, emit) async {
+      emit(AddDeleteUpdateLoading());
+      final result = await repository.addPost(event.post);
+      result.fold(
+            (failure) =>
+            emit(
+                AddDeleteUpdateFailure(message: _mapFailureToMessage(failure))),
+            (_) => emit(AddDeleteUpdateSuccess(message: 'Success')),
+      );
+    });
 
-      else if (event is UpdatePostEvent) {
-        emit(AddDeleteUpdateLoading());
-        final failureOrSuccessMessage = await updatePost(
-          event.post as PostEntity,
-        );
-        emit(_either(failureOrSuccessMessage, Update_Success_Message));
-      }
+    on<UpdatePostEvent>((event, emit) async {
+      emit(AddDeleteUpdateLoading());
+      final result = await repository.updatePost(event.post);
+      result.fold(
+            (failure) =>
+            emit(
+                AddDeleteUpdateFailure(message: _mapFailureToMessage(failure))),
+            (_) => emit(AddDeleteUpdateSuccess(message: 'Success')),
+      );
+    });
 
-      else if (event is DeletePostEvent) {
-        emit(AddDeleteUpdateLoading());
-        final failureOrSuccessMessage = await deletePost(event.postId);
-        emit(_either(failureOrSuccessMessage, Delete_Success_Message));
-      }
+    on<DeletePostEvent>((event, emit) async {
+      emit(AddDeleteUpdateLoading());
+      final result = await repository.deletePost(event.postId);
+      result.fold(
+            (failure) =>
+            emit(
+                AddDeleteUpdateFailure(message: _mapFailureToMessage(failure))),
+            (_) => emit(AddDeleteUpdateSuccess(message: 'Success')),
+      );
     });
   }
-}
 
-AddDeleteUpdateState _either(Either<Failure, Unit> either, String message) {
-  return either.fold(
-    (failure) => AddDeleteUpdateFailure(message: _mapFailureToMessage(failure)),
-    (_) => AddDeleteUpdateSuccess(message: message),
-  );
-}
-
-String _mapFailureToMessage(Failure failure) {
-  switch (failure.runtimeType) {
-    case ServerFailure():
-      return Server_Failure_Message;
-    case EmptyCacheFailure():
-      return Empty_Cache_Failure_Message;
-    case OffLineFailure():
-      return OffLine_Failure_Message;
-    default:
-      return "  UnExpected Error . ";
+  String _mapFailureToMessage(Failure failure) {
+    switch (failure.runtimeType) {
+      case ServerFailure():
+        return Server_Failure_Message;
+      case EmptyCacheFailure():
+        return Empty_Cache_Failure_Message;
+      case OffLineFailure():
+        return OffLine_Failure_Message;
+      default:
+        return "  UnExpected Error . ";
+    }
   }
 }

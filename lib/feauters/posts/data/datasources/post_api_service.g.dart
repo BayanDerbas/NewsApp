@@ -29,7 +29,7 @@ class _PostApiService implements PostApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'https://jsonplaceholder.typicode.com/posts',
+            '/posts',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -60,7 +60,7 @@ class _PostApiService implements PostApiService {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'https://jsonplaceholder.typicode.com/posts',
+            '/posts',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -82,7 +82,7 @@ class _PostApiService implements PostApiService {
       Options(method: 'PATCH', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'https://jsonplaceholder.typicode.com/posts/${id}',
+            '/posts/${id}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -103,7 +103,7 @@ class _PostApiService implements PostApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'https://jsonplaceholder.typicode.com/posts/${id}',
+            '/posts/${id}',
             queryParameters: queryParameters,
             data: _data,
           )

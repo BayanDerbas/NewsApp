@@ -24,6 +24,15 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
       final posts = await getAllPosts.call();
       emit(_mapFailureOrSuccessState(posts));
     });
+
+    on<LoadRestoredPostsEvent>((event, emit) {
+      emit(PostsSuccess(posts: event.posts));
+    });
+
+    on<RestorePostsEvent>((event, emit) {
+      emit(PostsSuccess(posts: event.posts));
+    });
+
   }
 
   PostsState _mapFailureOrSuccessState(
@@ -47,4 +56,6 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
         return "Unexpected Error.";
     }
   }
+
+
 }
